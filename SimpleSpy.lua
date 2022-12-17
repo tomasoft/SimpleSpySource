@@ -395,6 +395,8 @@ local captureRemotes = true
 -- types of remotes that can be saved / restored
 local remotesListTypes = {"blocklist", "blacklist"}
 
+local saveFolder = SimpleSpy2.Name
+
 -- functions
 
 --- Converts arguments to a string and generates code that calls the specified method with them, recommended to be used in conjunction with ValueToString (method must be a string, e.g. `game:GetService("ReplicatedStorage").Remote.remote:FireServer`)
@@ -493,7 +495,6 @@ local function split(inputstr, sep)
 end
 
 local function saveRemotes(type, remotesList)
-	local saveFolder = SimpleSpy2.Name
 	if not isfolder(saveFolder) then
 		makefolder(saveFolder)
 	end
@@ -511,7 +512,6 @@ local function saveRemotes(type, remotesList)
 end
 
 local function clearSavedRemotes(type)
-	local saveFolder = SimpleSpy2.Name
 	local path = saveFolder .. "\\".. placeId .. type .. ".txt"
 	if isfile(path) then
 		writefile(path, "")
@@ -521,7 +521,6 @@ end
 local function restoreExcludedRemotes()
 	for _, remoteListType in pairs(remotesListTypes) do
 		local remoteType = tostring(remoteListType)
-		local saveFolder = SimpleSpy2.Name
 		if not isfolder(saveFolder) then return end
 		local path = saveFolder .. "\\".. placeId .. remoteType .. ".txt"
 		if isfile(path) then
