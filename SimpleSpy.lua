@@ -2381,9 +2381,6 @@ if not _G.SimpleSpyExecuted then
 		oldIcon = Mouse.Icon
 		table.insert(connections, Mouse.Move:Connect(mouseMoved))
 
-		print(Background.Size)
-		print(RightPanel.Size)
-
 		restoreExcludedRemotes()
 	end)
 	if not succeeded then
