@@ -390,7 +390,6 @@ local keyToString = false
 -- determines whether return values are recorded
 local recordReturnValues = false
 
--- whether remotes will be captures by simpleSpy
 local captureRemotes = true
 
 -- types of remotes that can be saved / restored
@@ -1291,46 +1290,44 @@ end
 --- @param function_info string
 --- @param blocked any
 function newRemote(type, name, args, remote, function_info, blocked, src, returnValue)
-	if captureRemotes then
-		local remoteFrame = RemoteTemplate:Clone()
-		remoteFrame.Text.Text = string.sub(name, 1, 50)
-		remoteFrame.ColorBar.BackgroundColor3 = type == "event" and Color3.new(255, 242, 0) or Color3.fromRGB(99, 86, 245)
-		local id = Instance.new("IntValue")
-		id.Name = "ID"
-		id.Value = #logs + 1
-		id.Parent = remoteFrame
-		local weakRemoteTable = setmetatable({ remote = remote }, { __mode = "v" })
-		local log = {
-			Name = name,
-			Function = function_info,
-			Remote = weakRemoteTable,
-			Log = remoteFrame,
-			Blocked = blocked,
-			Source = src,
-			GenScript = "-- Generating, please wait... (click to reload)\n-- (If this message persists, the remote args are likely extremely long)",
-			ReturnValue = returnValue,
-		}
-		logs[#logs + 1] = log
-		schedule(function()
-			log.GenScript = genScript(remote, args)
-			if blocked then
-				logs[#logs].GenScript = "-- THIS REMOTE WAS PREVENTED FROM FIRING THE SERVER BY SIMPLESPY\n\n"
-					.. logs[#logs].GenScript
-			end
-		end)
-		local connect = remoteFrame.Button.MouseButton1Click:Connect(function()
-			eventSelect(remoteFrame)
-		end)
-		if layoutOrderNum < 1 then
-			layoutOrderNum = 999999999
+	local remoteFrame = RemoteTemplate:Clone()
+	remoteFrame.Text.Text = string.sub(name, 1, 50)
+	remoteFrame.ColorBar.BackgroundColor3 = type == "event" and Color3.new(255, 242, 0) or Color3.fromRGB(99, 86, 245)
+	local id = Instance.new("IntValue")
+	id.Name = "ID"
+	id.Value = #logs + 1
+	id.Parent = remoteFrame
+	local weakRemoteTable = setmetatable({ remote = remote }, { __mode = "v" })
+	local log = {
+		Name = name,
+		Function = function_info,
+		Remote = weakRemoteTable,
+		Log = remoteFrame,
+		Blocked = blocked,
+		Source = src,
+		GenScript = "-- Generating, please wait... (click to reload)\n-- (If this message persists, the remote args are likely extremely long)",
+		ReturnValue = returnValue,
+	}
+	logs[#logs + 1] = log
+	schedule(function()
+		log.GenScript = genScript(remote, args)
+		if blocked then
+			logs[#logs].GenScript = "-- THIS REMOTE WAS PREVENTED FROM FIRING THE SERVER BY SIMPLESPY\n\n"
+				.. logs[#logs].GenScript
 		end
-		remoteFrame.LayoutOrder = layoutOrderNum
-		layoutOrderNum = layoutOrderNum - 1
-		remoteFrame.Parent = LogList
-		table.insert(remoteLogs, 1, { connect, remoteFrame })
-		clean()
-		updateRemoteCanvas()
+	end)
+	local connect = remoteFrame.Button.MouseButton1Click:Connect(function()
+		eventSelect(remoteFrame)
+	end)
+	if layoutOrderNum < 1 then
+		layoutOrderNum = 999999999
 	end
+	remoteFrame.LayoutOrder = layoutOrderNum
+	layoutOrderNum = layoutOrderNum - 1
+	remoteFrame.Parent = LogList
+	table.insert(remoteLogs, 1, { connect, remoteFrame })
+	clean()
+	updateRemoteCanvas()
 end
 
 --- Generates a script from the provided arguments (first has to be remote path)
@@ -2665,6 +2662,7 @@ newButton("Toggle Capture", function()
 		captureRemotes and "ENABLED" or "DISABLED"
 	)
 end, function()
+	toggleSpyMethod()
 	captureRemotes = not captureRemotes
 	TextLabel.Text = string.format(
 		"[%s] Toggle remotes capture",
