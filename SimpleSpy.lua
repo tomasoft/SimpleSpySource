@@ -63,7 +63,7 @@ Background.Parent = SimpleSpy2
 Background.BackgroundColor3 = Color3.new(1, 1, 1)
 Background.BackgroundTransparency = 1
 Background.Position = UDim2.new(0, 500, 0, 200)
-Background.Size = UDim2.new(0, 650, 0, 268)
+Background.Size = UDim2.new(0, 630, 0, 268)
 
 LeftPanel.Name = "LeftPanel"
 LeftPanel.Parent = Background
@@ -133,7 +133,7 @@ RightPanel.Parent = Background
 RightPanel.BackgroundColor3 = Color3.fromRGB(37, 36, 38)
 RightPanel.BorderSizePixel = 0
 RightPanel.Position = UDim2.new(0, 131, 0, 19)
-RightPanel.Size = UDim2.new(0, 519, 0, 249)
+RightPanel.Size = UDim2.new(0, 500, 0, 249)
 
 CodeBox.Name = "CodeBox"
 CodeBox.Parent = RightPanel
