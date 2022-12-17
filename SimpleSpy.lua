@@ -65,6 +65,8 @@ Background.BackgroundTransparency = 1
 Background.Position = UDim2.new(0, 500, 0, 200)
 Background.Size = UDim2.new(0, 630, 0, 268)
 
+print(Background.Size)
+
 LeftPanel.Name = "LeftPanel"
 LeftPanel.Parent = Background
 LeftPanel.BackgroundColor3 = Color3.fromRGB(53, 52, 55)
