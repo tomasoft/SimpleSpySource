@@ -497,21 +497,24 @@ local function saveRemotes(type, remotesList)
 	if not isfolder(PlaceId) then
 		makefolder(PlaceId)
 	end
-    local path = PlaceId .. "/".. type .. ".txt"
+	local path = PlaceId .. "/".. type .. ".txt"
 	print("saving file", path)
-    local file = io.open(path,'w')
 	for key, value in pairs(remotesList) do
-		file:write(tostring(key .. "|" .. value))	
+		local content = tostring(key .. "|" .. value)
+		print("Added" .. content .. " to " .. path)
+		if not isfile(path) then
+			writefile(path, content)
+		else
+			appendfile(path, content)
+		end
 	end
-    io.close(file)
-    file = nil
 end
 
 local function clearSavedRemotes(type)
 	local path = PlaceId .. "/".. type .. ".txt"
 	if isfile(path) then
 		print("cleaning up file", path)
-		io.open(path, "w"):close()
+		writefile(path, "")
 	end
 end
 
@@ -521,9 +524,8 @@ local function restoreExcludedRemotes()
 		local path = PlaceId .. "/".. type .. ".txt"
 		if isfile(path) then
 			print("path is", path)
-			local file = io.open(path,'rb')
 			if file then
-				local content = file:read("*all")
+				local content = readfile(path)
 				for _, value in pairs(content) do
 					local readContent = split(value, '|')
 					if remoteListType == "blocklist" then
@@ -535,9 +537,7 @@ local function restoreExcludedRemotes()
 						blacklist[readContent[1]] = readContent[2]
 					end
 				end
-				file:close()
 			end
-			file = nil
 		end
 	end
 end
