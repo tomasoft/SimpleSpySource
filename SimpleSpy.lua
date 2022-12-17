@@ -528,8 +528,9 @@ local function restoreExcludedRemotes()
 		local path = placeId .. "\\".. tostring(remoteListType) .. ".txt"
 		if isfile(path) then
 			print("path is", path)
-			local content = readfile(path)
-			for _, value in pairs(content) do
+			local fileContent = readfile(path)
+			local fileContents = split(fileContent, '\n')
+			for _, value in pairs(fileContents) do
 				local readContent = split(value, '|')
 				local remote = readContent[1]
 				local flag = readContent[2]
