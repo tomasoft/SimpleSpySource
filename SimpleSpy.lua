@@ -528,18 +528,16 @@ local function restoreExcludedRemotes()
 		local path = placeId .. "/".. tostring(remoteListType) .. ".txt"
 		if isfile(path) then
 			print("path is", path)
-			if file then
-				local content = readfile(path)
-				for _, value in pairs(content) do
-					local readContent = split(value, '|')
-					if remoteListType == "blocklist" then
-						print("blocklist", readContent[1], readContent[2])
-						blocklist[readContent[1]] = readContent[2]
-					end
-					if remoteListType == "blacklist" then
-						print("blacklist", readContent[1], readContent[2])
-						blacklist[readContent[1]] = readContent[2]
-					end
+			local content = readfile(path)
+			for _, value in pairs(content) do
+				local readContent = split(value, '|')
+				if tostring(remoteListType) == "blocklist" then
+					print("blocklist", readContent[1], readContent[2])
+					blocklist[readContent[1]] = readContent[2]
+				end
+				if tostring(remoteListType) == "blacklist" then
+					print("blacklist", readContent[1], readContent[2])
+					blacklist[readContent[1]] = readContent[2]
 				end
 			end
 		end
