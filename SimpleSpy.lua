@@ -497,7 +497,7 @@ local function saveRemotes(type, remotesList)
 	if not isfolder(placeId) then
 		makefolder(placeId)
 	end
-	local path = placeId .. "/".. type .. ".txt"
+	local path = placeId .. "\\".. type .. ".txt"
 	print("saving file", path)
 	for key, value in pairs(remotesList) do
 		local k = tostring(key)
@@ -513,7 +513,7 @@ local function saveRemotes(type, remotesList)
 end
 
 local function clearSavedRemotes(type)
-	local path = placeId .. "/".. type .. ".txt"
+	local path = placeId .. "\\".. type .. ".txt"
 	if isfile(path) then
 		print("cleaning up file", path)
 		writefile(path, "")
@@ -525,7 +525,7 @@ local function restoreExcludedRemotes()
 		print(remoteListType)
 		if not isfolder(placeId) then return end
 		print("folder found")
-		local path = placeId .. "/".. tostring(remoteListType) .. ".txt"
+		local path = placeId .. "\\".. tostring(remoteListType) .. ".txt"
 		if isfile(path) then
 			print("path is", path)
 			local content = readfile(path)
