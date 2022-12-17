@@ -493,10 +493,11 @@ local function split(inputstr, sep)
 end
 
 local function saveRemotes(type, remotesList)
-	if not isfolder(placeId) then
-		makefolder(placeId)
+	local saveFolder = SimpleSpy2.Name
+	if not isfolder(saveFolder) then
+		makefolder(saveFolder)
 	end
-	local path = placeId .. "\\".. type .. ".txt"
+	local path = saveFolder .. "\\".. placeId .. type .. ".txt"
 	for key, value in pairs(remotesList) do
 		local k = tostring(key)
 		local v = tostring(value)
@@ -510,7 +511,8 @@ local function saveRemotes(type, remotesList)
 end
 
 local function clearSavedRemotes(type)
-	local path = placeId .. "\\".. type .. ".txt"
+	local saveFolder = SimpleSpy2.Name
+	local path = saveFolder .. "\\".. placeId .. type .. ".txt"
 	if isfile(path) then
 		writefile(path, "")
 	end
@@ -519,8 +521,9 @@ end
 local function restoreExcludedRemotes()
 	for _, remoteListType in pairs(remotesListTypes) do
 		local remoteType = tostring(remoteListType)
-		if not isfolder(placeId) then return end
-		local path = placeId .. "\\".. tostring(remoteListType) .. ".txt"
+		local saveFolder = SimpleSpy2.Name
+		if not isfolder(saveFolder) then return end
+		local path = saveFolder .. "\\".. placeId .. remoteType .. ".txt"
 		if isfile(path) then
 			local fileContents = split(readfile(path), '\n')
 			for _, value in pairs(fileContents) do
