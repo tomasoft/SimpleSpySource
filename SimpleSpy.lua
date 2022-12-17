@@ -63,7 +63,7 @@ Background.Parent = SimpleSpy2
 Background.BackgroundColor3 = Color3.new(1, 1, 1)
 Background.BackgroundTransparency = 1
 Background.Position = UDim2.new(0, 500, 0, 200)
-Background.Size = UDim2.new(0, 450, 0, 268)
+Background.Size = UDim2.new(0, 650, 0, 268)
 
 LeftPanel.Name = "LeftPanel"
 LeftPanel.Parent = Background
