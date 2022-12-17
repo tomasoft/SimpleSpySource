@@ -2662,8 +2662,8 @@ newButton("Toggle Capture", function()
 		captureRemotes and "ENABLED" or "DISABLED"
 	)
 end, function()
-	toggleSpyMethod()
 	captureRemotes = not captureRemotes
+	toggleSpyMethod()
 	TextLabel.Text = string.format(
 		"[%s] Toggle remotes capture",
 		captureRemotes and "ENABLED" or "DISABLED"
