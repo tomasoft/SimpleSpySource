@@ -503,7 +503,7 @@ local function saveRemotes(type, remotesList)
 		local k = tostring(key)
 		local v = tostring(value)
 		local content = k .. "|" .. v
-		print("Added" .. content .. " to " .. path)
+		print("Added " .. content .. " to " .. path)
 		if not isfile(path) then
 			writefile(path, content)
 		else
@@ -523,7 +523,7 @@ end
 local function restoreExcludedRemotes()
 	for _, remoteListType in pairs(remotesListTypes) do
 		if not isfolder(placeId) then return end
-		local path = placeId .. "/".. "blocklist" .. ".txt"
+		local path = placeId .. "/".. tostring(remoteListType) .. ".txt"
 		if isfile(path) then
 			print("path is", path)
 			if file then
