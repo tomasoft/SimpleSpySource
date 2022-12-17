@@ -498,12 +498,10 @@ local function saveRemotes(type, remotesList)
 		makefolder(placeId)
 	end
 	local path = placeId .. "\\".. type .. ".txt"
-	print("saving file", path)
 	for key, value in pairs(remotesList) do
 		local k = tostring(key)
 		local v = tostring(value)
 		local content = k .. "|" .. v
-		print("Added " .. content .. " to " .. path)
 		if not isfile(path) then
 			writefile(path, content)
 		else
@@ -515,7 +513,6 @@ end
 local function clearSavedRemotes(type)
 	local path = placeId .. "\\".. type .. ".txt"
 	if isfile(path) then
-		print("cleaning up file", path)
 		writefile(path, "")
 	end
 end
