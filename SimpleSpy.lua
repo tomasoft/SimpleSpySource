@@ -15,7 +15,7 @@ end
 
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
-local PlaceId = tostring(game.PlaceId)
+local placeId = tostring(game.PlaceId)
 local Highlight =
 	loadstring(
 		game:HttpGet("https://github.com/exxtremestuffs/SimpleSpySource/raw/master/highlight.lua")
@@ -494,10 +494,10 @@ local function split(inputstr, sep)
 end
 
 local function saveRemotes(type, remotesList)
-	if not isfolder(PlaceId) then
-		makefolder(PlaceId)
+	if not isfolder(placeId) then
+		makefolder(placeId)
 	end
-	local path = PlaceId .. "/".. type .. ".txt"
+	local path = placeId .. "/".. type .. ".txt"
 	print("saving file", path)
 	for key, value in pairs(remotesList) do
 		local content = tostring(key .. "|" .. value)
@@ -511,7 +511,7 @@ local function saveRemotes(type, remotesList)
 end
 
 local function clearSavedRemotes(type)
-	local path = PlaceId .. "/".. type .. ".txt"
+	local path = placeId .. "/".. type .. ".txt"
 	if isfile(path) then
 		print("cleaning up file", path)
 		writefile(path, "")
@@ -520,8 +520,8 @@ end
 
 local function restoreExcludedRemotes()
 	for _, remoteListType in pairs(remotesListTypes) do
-		if not isfolder(PlaceId) then return end
-		local path = PlaceId .. "/".. tostring(remoteListType) .. ".txt"
+		if not isfolder(placeId) then return end
+		local path = placeId .. "/".. "blocklist" .. ".txt"
 		if isfile(path) then
 			print("path is", path)
 			if file then
