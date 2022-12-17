@@ -522,6 +522,7 @@ end
 
 local function restoreExcludedRemotes()
 	for _, remoteListType in pairs(remotesListTypes) do
+		print(remoteListType)
 		if not isfolder(placeId) then return end
 		print("folder found")
 		local path = placeId .. "/".. tostring(remoteListType) .. ".txt"
