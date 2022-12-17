@@ -531,13 +531,15 @@ local function restoreExcludedRemotes()
 			local content = readfile(path)
 			for _, value in pairs(content) do
 				local readContent = split(value, '|')
+				local remote = readContent[1]
+				local flag = readContent[2]
 				if tostring(remoteListType) == "blocklist" then
-					print("blocklist", readContent[1], readContent[2])
-					blocklist[readContent[1]] = readContent[2]
+					print("blocklist", remote, flag)
+					blocklist[remote] = flag
 				end
 				if tostring(remoteListType) == "blacklist" then
-					print("blacklist", readContent[1], readContent[2])
-					blacklist[readContent[1]] = readContent[2]
+					print("blacklist", remote, flag)
+					blocklist[remote] = flag
 				end
 			end
 		end
