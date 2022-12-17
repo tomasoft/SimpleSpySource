@@ -15,7 +15,7 @@ end
 
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
-local PlaceId = game.PlaceId
+local PlaceId = tostring(game.PlaceId)
 local Highlight =
 	loadstring(
 		game:HttpGet("https://github.com/exxtremestuffs/SimpleSpySource/raw/master/highlight.lua")
