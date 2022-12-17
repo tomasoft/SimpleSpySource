@@ -531,7 +531,6 @@ local function restoreExcludedRemotes()
 				local readContent = split(value, '|')
 				local remote = readContent[1]
 				local flag = readContent[2]
-				print(remoteType, remote, flag)
 				if remoteType == "blocklist" then
 					blocklist[remote] = flag
 				end
