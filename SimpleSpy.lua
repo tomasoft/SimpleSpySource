@@ -494,7 +494,10 @@ local function split(inputstr, sep)
 end
 
 local function saveRemotes(type, remotesList)
-    local path = system.pathForFile(PlaceId .. "_" .. type .. ".txt", system.DocumentsDirectory)
+	if not isfolder(PlaceId) then
+		makefolder(PlaceId)
+	end
+    local path = PlaceId .. "/".. type .. ".txt"
 	print("saving file", path)
     local file = io.open(path,'w')
 	for key, value in pairs(remotesList) do
@@ -505,15 +508,18 @@ local function saveRemotes(type, remotesList)
 end
 
 local function clearSavedRemotes(type)
-	local path = system.pathForFile(PlaceId .. "_" .. type .. ".txt", system.DocumentsDirectory)
-	print("cleaning up file", path)
-	io.open(path,"w"):close()
+	local path = PlaceId .. "/".. type .. ".txt"
+	if isfile(path) then
+		print("cleaning up file", path)
+		io.open(path, "w"):close()
+	end
 end
 
 local function restoreExcludedRemotes()
 	for _, remoteListType in pairs(remotesListTypes) do
-		local path = system.pathForFile(PlaceId .. "_" .. remoteListType .. ".txt", system.DocumentsDirectory)
-		if path then
+		if not isfolder(PlaceId) then return end
+		local path = PlaceId .. "/".. type .. ".txt"
+		if isfile(path) then
 			print("path is", path)
 			local file = io.open(path,'rb')
 			if file then
