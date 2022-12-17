@@ -1294,44 +1294,46 @@ end
 --- @param function_info string
 --- @param blocked any
 function newRemote(type, name, args, remote, function_info, blocked, src, returnValue)
-	local remoteFrame = RemoteTemplate:Clone()
-	remoteFrame.Text.Text = string.sub(name, 1, 50)
-	remoteFrame.ColorBar.BackgroundColor3 = type == "event" and Color3.new(255, 242, 0) or Color3.fromRGB(99, 86, 245)
-	local id = Instance.new("IntValue")
-	id.Name = "ID"
-	id.Value = #logs + 1
-	id.Parent = remoteFrame
-	local weakRemoteTable = setmetatable({ remote = remote }, { __mode = "v" })
-	local log = {
-		Name = name,
-		Function = function_info,
-		Remote = weakRemoteTable,
-		Log = remoteFrame,
-		Blocked = blocked,
-		Source = src,
-		GenScript = "-- Generating, please wait... (click to reload)\n-- (If this message persists, the remote args are likely extremely long)",
-		ReturnValue = returnValue,
-	}
-	logs[#logs + 1] = log
-	schedule(function()
-		log.GenScript = genScript(remote, args)
-		if blocked then
-			logs[#logs].GenScript = "-- THIS REMOTE WAS PREVENTED FROM FIRING THE SERVER BY SIMPLESPY\n\n"
-				.. logs[#logs].GenScript
+	if captureRemotes then
+		local remoteFrame = RemoteTemplate:Clone()
+		remoteFrame.Text.Text = string.sub(name, 1, 50)
+		remoteFrame.ColorBar.BackgroundColor3 = type == "event" and Color3.new(255, 242, 0) or Color3.fromRGB(99, 86, 245)
+		local id = Instance.new("IntValue")
+		id.Name = "ID"
+		id.Value = #logs + 1
+		id.Parent = remoteFrame
+		local weakRemoteTable = setmetatable({ remote = remote }, { __mode = "v" })
+		local log = {
+			Name = name,
+			Function = function_info,
+			Remote = weakRemoteTable,
+			Log = remoteFrame,
+			Blocked = blocked,
+			Source = src,
+			GenScript = "-- Generating, please wait... (click to reload)\n-- (If this message persists, the remote args are likely extremely long)",
+			ReturnValue = returnValue,
+		}
+		logs[#logs + 1] = log
+		schedule(function()
+			log.GenScript = genScript(remote, args)
+			if blocked then
+				logs[#logs].GenScript = "-- THIS REMOTE WAS PREVENTED FROM FIRING THE SERVER BY SIMPLESPY\n\n"
+					.. logs[#logs].GenScript
+			end
+		end)
+		local connect = remoteFrame.Button.MouseButton1Click:Connect(function()
+			eventSelect(remoteFrame)
+		end)
+		if layoutOrderNum < 1 then
+			layoutOrderNum = 999999999
 		end
-	end)
-	local connect = remoteFrame.Button.MouseButton1Click:Connect(function()
-		eventSelect(remoteFrame)
-	end)
-	if layoutOrderNum < 1 then
-		layoutOrderNum = 999999999
+		remoteFrame.LayoutOrder = layoutOrderNum
+		layoutOrderNum = layoutOrderNum - 1
+		remoteFrame.Parent = LogList
+		table.insert(remoteLogs, 1, { connect, remoteFrame })
+		clean()
+		updateRemoteCanvas()
 	end
-	remoteFrame.LayoutOrder = layoutOrderNum
-	layoutOrderNum = layoutOrderNum - 1
-	remoteFrame.Parent = LogList
-	table.insert(remoteLogs, 1, { connect, remoteFrame })
-	clean()
-	updateRemoteCanvas()
 end
 
 --- Generates a script from the provided arguments (first has to be remote path)
@@ -2224,44 +2226,42 @@ end, originalFunction)
 
 --- Toggles on and off the remote spy
 function toggleSpy()
-	if captureRemotes then
-		if not toggle then
-			if hookmetamethod then
-				local oldNamecall = hookmetamethod(game, "__namecall", newnamecall)
-				original = original or function(...)
-					return oldNamecall(...)
-				end
-				_G.OriginalNamecall = original
-			else
-				gm = gm or getrawmetatable(game)
-				original = original or function(...)
-					return gm.__namecall(...)
-				end
-				setreadonly(gm, false)
-				if not original then
-					warn("SimpleSpy: namecall method not found!")
-					onToggleButtonClick()
-					return
-				end
-				gm.__namecall = newnamecall
-				setreadonly(gm, true)
+	if not toggle then
+		if hookmetamethod then
+			local oldNamecall = hookmetamethod(game, "__namecall", newnamecall)
+			original = original or function(...)
+				return oldNamecall(...)
 			end
-			originalEvent = hookfunction(remoteEvent.FireServer, newFireServer)
-			originalFunction = hookfunction(remoteFunction.InvokeServer, newInvokeServer)
+			_G.OriginalNamecall = original
 		else
-			if hookmetamethod then
-				if original then
-					hookmetamethod(game, "__namecall", original)
-				end
-			else
-				gm = gm or getrawmetatable(game)
-				setreadonly(gm, false)
-				gm.__namecall = original
-				setreadonly(gm, true)
+			gm = gm or getrawmetatable(game)
+			original = original or function(...)
+				return gm.__namecall(...)
 			end
-			hookfunction(remoteEvent.FireServer, originalEvent)
-			hookfunction(remoteFunction.InvokeServer, originalFunction)
+			setreadonly(gm, false)
+			if not original then
+				warn("SimpleSpy: namecall method not found!")
+				onToggleButtonClick()
+				return
+			end
+			gm.__namecall = newnamecall
+			setreadonly(gm, true)
 		end
+		originalEvent = hookfunction(remoteEvent.FireServer, newFireServer)
+		originalFunction = hookfunction(remoteFunction.InvokeServer, newInvokeServer)
+	else
+		if hookmetamethod then
+			if original then
+				hookmetamethod(game, "__namecall", original)
+			end
+		else
+			gm = gm or getrawmetatable(game)
+			setreadonly(gm, false)
+			gm.__namecall = original
+			setreadonly(gm, true)
+		end
+		hookfunction(remoteEvent.FireServer, originalEvent)
+		hookfunction(remoteFunction.InvokeServer, originalFunction)
 	end
 end
 
@@ -2662,7 +2662,7 @@ end, function()
 end)
 
 --- pauses remotes capture
-newButton("Disable Info", function()
+newButton("Toggle Capture", function()
 	return string.format(
 		"[%s] Toggle remotes capture",
 		captureRemotes and "ENABLED" or "DISABLED"
