@@ -15,6 +15,7 @@ end
 
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
+local PlaceId = game.PlaceId
 local Highlight =
 	loadstring(
 		game:HttpGet("https://github.com/exxtremestuffs/SimpleSpySource/raw/master/highlight.lua")
@@ -389,6 +390,12 @@ local keyToString = false
 -- determines whether return values are recorded
 local recordReturnValues = false
 
+-- whether remotes will be captures by simpleSpy
+local captureRemotes = true
+
+-- types of remotes that can be saved / restored
+local remotesListTypes = {"blocklist", "blacklist"}
+
 -- functions
 
 --- Converts arguments to a string and generates code that calls the specified method with them, recommended to be used in conjunction with ValueToString (method must be a string, e.g. `game:GetService("ReplicatedStorage").Remote.remote:FireServer`)
@@ -476,6 +483,54 @@ function SimpleSpy:ExcludeRemote(remote)
 		"Instance | string expected, got " .. typeof(remote)
 	)
 	blacklist[remote] = true
+end
+
+local function split(inputstr, sep)
+    local t={}
+    for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+            table.insert(t, str)
+    end
+    return t
+end
+
+local function saveRemotes(type, remotesList)
+    local path = system.pathForFile(PlaceId .. "_" .. type .. ".txt", system.DocumentsDirectory)
+	print("saving file", path)
+    local file = io.open(path,'w')
+	for key, value in pairs(remotesList) do
+		file:write(tostring(key .. "|" .. value))	
+	end
+    io.close(file)
+    file = nil
+end
+
+local function clearSavedRemotes(type)
+	local path = system.pathForFile(PlaceId .. "_" .. type .. ".txt", system.DocumentsDirectory)
+	print("cleaning up file", path)
+	io.open(path,"w"):close()
+end
+
+local function restoreExcludedRemotes()
+	for _, remoteListType in pairs(remotesListTypes) do
+		local path = system.pathForFile(PlaceId .. "_" .. remoteListType .. ".txt", system.DocumentsDirectory)
+		local file = io.open(path,'rb')
+		if file then
+			local content = file:read("*all")
+			for _, value in pairs(content) do
+				local readContent = split(value, '|')
+				if remoteListType == "blocklist" then
+					print("blocklist", readContent[1], readContent[2])
+					blocklist[readContent[1]] = readContent[2]
+				end
+				if remoteListType == "blacklist" then
+					print("blacklist", readContent[1], readContent[2])
+					blacklist[readContent[1]] = readContent[2]
+				end
+			end
+			file:close()
+		end
+		file = nil	
+	end
 end
 
 --- Creates a new ScriptSignal that can be connected to and fired
@@ -2160,42 +2215,44 @@ end, originalFunction)
 
 --- Toggles on and off the remote spy
 function toggleSpy()
-	if not toggle then
-		if hookmetamethod then
-			local oldNamecall = hookmetamethod(game, "__namecall", newnamecall)
-			original = original or function(...)
-				return oldNamecall(...)
+	if captureRemotes then
+		if not toggle then
+			if hookmetamethod then
+				local oldNamecall = hookmetamethod(game, "__namecall", newnamecall)
+				original = original or function(...)
+					return oldNamecall(...)
+				end
+				_G.OriginalNamecall = original
+			else
+				gm = gm or getrawmetatable(game)
+				original = original or function(...)
+					return gm.__namecall(...)
+				end
+				setreadonly(gm, false)
+				if not original then
+					warn("SimpleSpy: namecall method not found!")
+					onToggleButtonClick()
+					return
+				end
+				gm.__namecall = newnamecall
+				setreadonly(gm, true)
 			end
-			_G.OriginalNamecall = original
+			originalEvent = hookfunction(remoteEvent.FireServer, newFireServer)
+			originalFunction = hookfunction(remoteFunction.InvokeServer, newInvokeServer)
 		else
-			gm = gm or getrawmetatable(game)
-			original = original or function(...)
-				return gm.__namecall(...)
+			if hookmetamethod then
+				if original then
+					hookmetamethod(game, "__namecall", original)
+				end
+			else
+				gm = gm or getrawmetatable(game)
+				setreadonly(gm, false)
+				gm.__namecall = original
+				setreadonly(gm, true)
 			end
-			setreadonly(gm, false)
-			if not original then
-				warn("SimpleSpy: namecall method not found!")
-				onToggleButtonClick()
-				return
-			end
-			gm.__namecall = newnamecall
-			setreadonly(gm, true)
+			hookfunction(remoteEvent.FireServer, originalEvent)
+			hookfunction(remoteFunction.InvokeServer, originalFunction)
 		end
-		originalEvent = hookfunction(remoteEvent.FireServer, newFireServer)
-		originalFunction = hookfunction(remoteFunction.InvokeServer, newInvokeServer)
-	else
-		if hookmetamethod then
-			if original then
-				hookmetamethod(game, "__namecall", original)
-			end
-		else
-			gm = gm or getrawmetatable(game)
-			setreadonly(gm, false)
-			gm.__namecall = original
-			setreadonly(gm, true)
-		end
-		hookfunction(remoteEvent.FireServer, originalEvent)
-		hookfunction(remoteFunction.InvokeServer, originalFunction)
 	end
 end
 
@@ -2317,6 +2374,8 @@ if not _G.SimpleSpyExecuted then
 		Mouse = Players.LocalPlayer:GetMouse()
 		oldIcon = Mouse.Icon
 		table.insert(connections, Mouse.Move:Connect(mouseMoved))
+
+		restoreExcludedRemotes()
 	end)
 	if not succeeded then
 		warn(
@@ -2444,6 +2503,7 @@ newButton("Exclude (i)", function()
 end, function()
 	if selected then
 		blacklist[selected.Remote.remote] = true
+		saveRemotes("blacklist", blacklist)
 		TextLabel.Text = "Excluded!"
 	end
 end)
@@ -2454,6 +2514,7 @@ newButton("Exclude (n)", function()
 end, function()
 	if selected then
 		blacklist[selected.Name] = true
+		saveRemotes("blacklist", blacklist)
 		TextLabel.Text = "Excluded!"
 	end
 end)
@@ -2463,6 +2524,7 @@ newButton("Clr Blacklist", function()
 	return "Click to clear the blacklist.\nExcluding a remote makes SimpleSpy ignore it, but it will continue to be usable."
 end, function()
 	blacklist = {}
+	clearSavedRemotes("blacklist")
 	TextLabel.Text = "Blacklist cleared!"
 end)
 
@@ -2473,6 +2535,7 @@ end, function()
 	if selected then
 		if selected.Remote.remote then
 			blocklist[selected.Remote.remote] = true
+			saveRemotes("blocklist", blocklist)
 			TextLabel.Text = "Excluded!"
 		else
 			TextLabel.Text = "Error! Instance may no longer exist, try using Block (n)."
@@ -2486,6 +2549,7 @@ newButton("Block (n)", function()
 end, function()
 	if selected then
 		blocklist[selected.Name] = true
+		saveRemotes("blocklist", blocklist)
 		TextLabel.Text = "Excluded!"
 	end
 end)
@@ -2495,6 +2559,7 @@ newButton("Clr Blocklist", function()
 	return "Click to stop blocking remotes.\nBlocking a remote won't remove it from SimpleSpy logs, but it will not continue to fire the server."
 end, function()
 	blocklist = {}
+	clearSavedRemotes("blocklist")
 	TextLabel.Text = "Blocklist cleared!"
 end)
 
@@ -2585,4 +2650,18 @@ end, function()
 	if selected then
 		codebox:setRaw(SimpleSpy:ValueToVar(selected.ReturnValue, "returnValue"))
 	end
+end)
+
+--- pauses remotes capture
+newButton("Disable Info", function()
+	return string.format(
+		"[%s] Toggle remotes capture",
+		captureRemotes and "ENABLED" or "DISABLED"
+	)
+end, function()
+	captureRemotes = not captureRemotes
+	TextLabel.Text = string.format(
+		"[%s] Toggle remotes capture",
+		captureRemotes and "ENABLED" or "DISABLED"
+	)
 end)
