@@ -513,23 +513,26 @@ end
 local function restoreExcludedRemotes()
 	for _, remoteListType in pairs(remotesListTypes) do
 		local path = system.pathForFile(PlaceId .. "_" .. remoteListType .. ".txt", system.DocumentsDirectory)
-		local file = io.open(path,'rb')
-		if file then
-			local content = file:read("*all")
-			for _, value in pairs(content) do
-				local readContent = split(value, '|')
-				if remoteListType == "blocklist" then
-					print("blocklist", readContent[1], readContent[2])
-					blocklist[readContent[1]] = readContent[2]
+		if path then
+			print("path is", path)
+			local file = io.open(path,'rb')
+			if file then
+				local content = file:read("*all")
+				for _, value in pairs(content) do
+					local readContent = split(value, '|')
+					if remoteListType == "blocklist" then
+						print("blocklist", readContent[1], readContent[2])
+						blocklist[readContent[1]] = readContent[2]
+					end
+					if remoteListType == "blacklist" then
+						print("blacklist", readContent[1], readContent[2])
+						blacklist[readContent[1]] = readContent[2]
+					end
 				end
-				if remoteListType == "blacklist" then
-					print("blacklist", readContent[1], readContent[2])
-					blacklist[readContent[1]] = readContent[2]
-				end
+				file:close()
 			end
-			file:close()
+			file = nil
 		end
-		file = nil	
 	end
 end
 
