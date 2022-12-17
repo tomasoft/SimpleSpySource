@@ -500,7 +500,9 @@ local function saveRemotes(type, remotesList)
 	local path = placeId .. "/".. type .. ".txt"
 	print("saving file", path)
 	for key, value in pairs(remotesList) do
-		local content = tostring(key) .. "|" .. tostring(value)
+		local k = tostring(key)
+		local v = tostring(value)
+		local content = k .. "|" .. v
 		print("Added" .. content .. " to " .. path)
 		if not isfile(path) then
 			writefile(path, content)
