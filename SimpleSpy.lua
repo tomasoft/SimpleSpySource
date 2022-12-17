@@ -529,7 +529,6 @@ local function restoreExcludedRemotes()
 		if isfile(path) then
 			print("path is", path)
 			local content = readfile(path)
-			print(content)
 			for _, value in pairs(content) do
 				local readContent = split(value, '|')
 				if tostring(remoteListType) == "blocklist" then
